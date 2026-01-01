@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahmet & Berra AI Asistanı</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary: rgba(106, 17, 203, 0.8);
+            --secondary: rgba(219, 39, 119, 0.8);
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --text: #333;
+            --text-light: #666;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header - Glassmorphism */
+        .header {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title h1 {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .heart {
+            color: #ff4757;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        /* Chat Area */
+        .chat-container {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 18px 22px;
+            border-radius: 22px;
+            line-height: 1.5;
+            animation: fadeIn 0.4s ease-out;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-message {
+            background: rgba(255, 255, 255, 0.9);
+            align-self: flex-start;
+            border-bottom-left-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .user-message {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 8px;
+            box-shadow: 0 4px 12px rgba(106, 17, 203, 0.2);
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .ai-icon, .user-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .ai-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .user-icon {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Input Area */
+        .input-container {
+            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        #userInput {
+            width: 100%;
+            padding: 18px 20px;
+            padding-right: 60px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            font-size: 1rem;
+            color: var(--text);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        #userInput:focus {
+            outline: none;
+            box-shadow: 0 6px 20px rgba(106, 17, 203, 0.15);
+            border: 1px solid var(--primary);
+        }
+
+        .send-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(106, 17, 203, 0.3);
+        }
+
+        .send-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 6px 16px rgba(106, 17, 203, 0.4);
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .feature-btn {
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            color: var(--text);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .feature-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Animations */
+        .floating-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .heart-particle {
+            position: absolute;
+            color: rgba(255, 71, 87, 0.3);
+            font-size: 20px;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 22px;
+            align-self: flex-start;
+            width: 70px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                height: 95vh;
+                border-radius: 16px;
+            }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .title h1 {
+                font-size: 1.4rem;
+            }
+            
+            .message {
+                max-width: 90%;
+                padding: 14px 18px;
+            }
+            
+            .input-container {
+                padding: 15px 20px;
+            }
+            
+            #userInput {
+                padding: 15px 20px;
+                padding-right: 55px;
+            }
+            
+            .send-btn {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Floating hearts background -->
+        <div class="floating-hearts" id="heartsContainer"></div>
+        
+        <!-- Header -->
+        <div class="header">
+            <div class="title">
+                <h1><i class="fas fa-robot"></i> Ahmet & Berra <i class="fas fa-heart heart"></i> AI Asistanı</h1>
+                <div class="subtitle">Matematik, Tarih, Genel Kültür ve Daha Fazlası | Kişiselleştirilmiş</div>
+            </div>
+        </div>
+        
+        <!-- Chat Container -->
+        <div class="chat-container" id="chatContainer">
+            <!-- Initial AI message -->
+            <div class="message ai-message">
+                <div class="message-header">
+                    <div class="ai-icon"><i class="fas fa-brain"></i></div>
+                    <div>Ahmet & Berra AI</div>
+                </div>
+                Merhaba! Ben Ahmet ve Berra için özel olarak tasarlanmış yapay zeka asistanıyım. 🎉 Size matematik, tarih, genel kültür ve daha birçok konuda yardımcı olabilirim. Ayrıca her konuşmamızda Ahmet ve Berra'nın özel dünyasına göndermeler yapmaya bayılıyorum! Nasıl yardımcı olabilirim?
+            </div>
+            
+            <!-- Typing indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        
+        <!-- Input Area -->
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Ahmet ve Berra hakkında bir şey sormak veya herhangi bir konuda yardım istemek için yazın...">
+                <button class="send-btn" id="sendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Quick features -->
+        <div class="features">
+            <div class="feature-btn" onclick="quickQuestion('matematik')">Matematik Sorusu</div>
+            <div class="feature-btn" onclick="quickQuestion('tarih')">Tarih Bilgisi</div>
+            <div class="feature-btn" onclick="quickQuestion('genel kültür')">Genel Kültür</div>
+            <div class="feature-btn" onclick="quickQuestion('ahmet berra')">Ahmet & Berra</div>
+        </div>
+    </div>
+
+    <script>
+        // Floating hearts creation
+        function createHearts() {
+            const container = document.getElementById('heartsContainer');
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart-particle';
+                heart.innerHTML = '❤';
+                heart.style.left = `${Math.random() * 100}%`;
+                heart.style.animationDelay = `${Math.random() * 15}s`;
+                heart.style.fontSize = `${Math.random() * 15 + 10}px`;
+                container.appendChild(heart);
+            }
+        }
+
+        // AI Responses with Ahmet & Berra integration
+        const aiResponses = {
+            greetings: [
+                "Ahmet ve Berra'nın harika enerjisiyle size merhaba diyorum! Bugün size nasıl yardımcı olabilirim?",
+                "Ahmet'in pozitifliği ve Berra'nın neşesi bana da geçti sanırım! Sizin için buradayım, sorunuz nedir?",
+                "Ahmet ve Berra gibi birbirini tamamlayan iki harika insandan ilham alarak tasarlandım! Size nasıl yardım edebilirim?"
+            ],
+            math: [
+                "Ahmet'in analitik zekası ve Berra'nın detaycılığı matematik konusunda mükemmel bir ikili oluşturur! Sorumuza gelelim: ",
+                "Ahmet ve Berra matematik problemlerini birlikte çözerken çok keyif alırlar. Ben de size şöyle açıklayayım: ",
+                "Matematik, Ahmet'in mantıksal yaklaşımı ve Berra'nın yaratıcılığı ile birleşince harikalar yaratır! Konumuza dönelim: "
+            ],
+            history: [
+                "Ahmet ve Berra tarihi yerleri gezmeyi çok severler. Tarih bilgilerini paylaşırken onların bu merakını düşünmeden edemiyorum! ",
+                "Tarih, Ahmet'in araştırmacılığı ve Berra'nın hikaye anlatıcılığı ile hayat bulur. İşte size tarihi bir bilgi: ",
+                "Ahmet ve Berra gibi tarihte de uyumlu ikililer vardır. Size tarihten bir kesit sunayım: "
+            ],
+            general: [
+                "Ahmet'in geniş bilgi birikimi ve Berra'nın kültürel ilgileri sayesinde bu konuda size harika bilgiler verebilirim! ",
+                "Ahmet ve Berra sohbetlerinde hep yeni şeyler öğrenirler. Size de ilginç bir genel kültür bilgisi vereyim: ",
+                "Genel kültür, Ahmet ve Berra'nın sohbetlerinin vazgeçilmezidir. İşte size ilginç bir bilgi: "
+            ],
+            ahmetBerra: [
+                "Ahmet ve Berra mükemmel bir ikili! Birbirlerini nasıl da tamamlıyorlar, değil mi?",
+                "Ahmet'in sakin ve mantıklı yaklaşımı, Berra'nın enerjik ve yaratıcı kişiliğiyle birleşince ortaya harika bir uyum çıkıyor.",
+                "Ahmet ve Berra'nın birlikteliği, uyumun ve karşılıklı saygının en güzel örneklerinden biri.",
+                "Ahmet ve Berra birlikteyken her zorluğun üstesinden gelebileceklerini gösteriyorlar.",
+                "Ahmet'in desteği ve Berra'nın cesareti, birlikte harika işler başarmalarını sağlıyor."
+            ],
+            default: [
+                "Ahmet ve Berra'nın iletişim gücünden ilham alarak size şöyle cevap vereyim: ",
+                "Ahmet'in sabrı ve Berra'nın anlayışı gibi, ben de size en doğru bilgiyi vermeye çalışıyorum: ",
+                "Ahmet ve Berra gibi uyumlu bir ikiliden öğrendiğim kadarıyla, size şöyle açıklayabilirim: "
+            ]
+        };
+
+        // Knowledge database
+        const knowledgeBase = {
+            matematik: {
+                "pisagor": "Pisagor teoremi: Bir dik üçgende hipotenüsün karesi, dik kenarların kareleri toplamına eşittir. (a² + b² = c²). Ahmet ve Berra gibi iki kenar birleşince hipotenüs gibi mükemmel bir sonuç ortaya çıkar!",
+                "integral": "Integral, bir fonksiyonun eğrisi altında kalan alanı hesaplama yöntemidir. Tıpkı Ahmet ve Berra'nın ilişkisi gibi - zamanla biriken güzel anıların toplamı!",
+                "türev": "Türev, bir fonksiyonun değişim oranını ölçer. Ahmet ve Berra'nın birbirlerine olan etkileri gibi, anlık değişimleri gösterir.",
+                "asal sayı": "Asal sayılar sadece 1'e ve kendisine bölünebilen sayılardır. Tıpkı Ahmet ve Berra'nın ilişkisi gibi - sadece birbirlerine bölünebilirler!",
+                "pi sayısı": "π (pi) sayısı yaklaşık 3.14159'dur ve daire çevresinin çapına oranıdır. Ahmet ve Berra'nın uyumu gibi sonsuza kadar devam eden bir sayı!"
+            },
+            tarih: {
+                "osmanlı": "Osmanlı İmparatorluğu 1299-1922 yılları arasında varlığını sürdürmüştür. Ahmet ve Berra gibi güçlü bir temel üzerine kurulmuş ve uzun süre ayakta kalmıştır.",
+                "cumhuriyet": "Türkiye Cumhuriyeti 29 Ekim 1923'te Mustafa Kemal Atatürk önderliğinde kuruldu. Ahmet ve Berra'nın birlikteliği gibi modern ve ileriye dönük bir yapı!",
+                "istanbul": "İstanbul, 1453'te Fatih Sultan Mehmet tarafından fethedildi. Ahmet ve Berra'nın keşfettiği gibi, tarih ve modern yaşamın buluştuğu harika bir şehir!",
+                "çanakkale": "Çanakkale Savaşı 1915-1916 yıllarında gerçekleşti ve Türk tarihinin en önemli zaferlerinden biridir. Ahmet ve Berra gibi birlik ve beraberliğin zaferi!"
+            },
+            genel: {
+                "uzay": "Evren yaklaşık 13.8 milyar yaşındadır. Ahmet ve Berra'nın keşfedeceği gibi sonsuz bir merak kaynağı!",
+                "okyanus": "Dünya yüzeyinin %71'i okyanuslarla kaplıdır. Tıpkı Ahmet ve Berra'nın duygusal derinliği gibi keşfedilmeyi bekleyen engin bir dünya!",
+                "müzik": "Müzik evrensel bir dildir. Ahmet ve Berra gibi farklı notaların uyum içinde birleşmesiyle güzelleşir.",
+                "sanat": "Sanat, duyguların ifade biçimidir. Ahmet'in anlayışı ve Berra'nın yaratıcılığı bir araya geldiğinde ortaya harika sanat eserleri çıkar!"
+            }
+        };
+
+        // DOM Elements
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Initialize
+        createHearts();
+
+        // Add message to chat
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
+            
+            if (isUser) {
+                messageHeader.innerHTML = `
+                    <div class="user-icon"><i class="fas fa-user"></i></div>
+                    <div>Siz</div>
+                `;
+            } else {
+                messageHeader.innerHTML = `
+                 
